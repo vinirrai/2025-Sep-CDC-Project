@@ -192,6 +192,8 @@ class OrbitalDebrisVisualizer {
 
     setupUI() {
         this.uiController = new UIController(this);
+        // Make UI controller globally accessible for AI chat functions
+        window.ui = this.uiController;
     }
 
     initializeTimeControls() {

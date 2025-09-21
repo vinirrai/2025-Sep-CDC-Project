@@ -10,6 +10,6 @@ export default defineConfig({
     sourcemap: true
   },
   optimizeDeps: {
-    include: ['three', 'satellite.js', 'gsap']
+    include: ['three', 'satellite.js', 'gsap', '@google/generative-ai', 'mammoth']
   }
 });

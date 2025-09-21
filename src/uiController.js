@@ -1,6 +1,11 @@
+import { GeminiService } from './geminiService.js';
+
 export class UIController {
     constructor(app) {
         this.app = app;
+        this.geminiService = new GeminiService();
+        this.currentSatelliteData = null;
+        this.chatHistory = [];
         this.infoPanel = document.getElementById('info-panel');
         this.panelContent = document.getElementById('panel-content');
         this.debrisName = document.getElementById('debris-name');
@@ -9,8 +14,10 @@ export class UIController {
         this.speedValue = document.getElementById('speed-value');
     }
 
-    showDebrisInfo(debrisData) {
+    async showDebrisInfo(debrisData) {
         this.debrisName.textContent = debrisData.name;
+        this.currentSatelliteData = debrisData;
+        this.chatHistory = []; // Reset chat history for new satellite
         
         // Calculate current orbital parameters
         const apogee = this.calculateApogee(debrisData.altitude, debrisData.eccentricity);
@@ -97,6 +104,13 @@ export class UIController {
                     <span class="info-value">${this.classifyObject(debrisData.name)}</span>
                 </div>
             </div>
+            
+            <div class="ai-assistant-section">
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <span>Loading AI assistant...</span>
+                </div>
+            </div>
         `;
         
         // Show the panel and ensure it's not minimized
@@ -121,6 +135,9 @@ export class UIController {
             this.infoPanel.style.right = '';
             this.infoPanel.style.bottom = '';
         }
+        
+        // Load AI assistant content
+        await this.loadAIAssistant(debrisData);
     }
 
     hideInfoPanel() {
@@ -231,5 +248,173 @@ export class UIController {
         } else {
             return "Satellite";
         }
+    }
+
+    async loadAIAssistant(satelliteData) {
+        const aiSection = this.panelContent.querySelector('.ai-assistant-section');
+        
+        try {
+            // Load satellite documentation
+            const documentContent = await this.geminiService.loadSatelliteDocument(satelliteData.name);
+            
+            // Generate satellite introduction
+            const intro = await this.geminiService.generateSatelliteIntro(satelliteData, documentContent);
+            
+            // Generate suggested questions
+            const suggestedQuestions = await this.geminiService.generateSuggestedQuestions(satelliteData, documentContent);
+            
+            // Update the AI section with content
+            aiSection.innerHTML = `
+                <div class="satellite-intro">
+                    ${intro}
+                </div>
+                
+                <div class="suggested-questions">
+                    <h5>Ask me about:</h5>
+                    ${suggestedQuestions.map(question => 
+                        `<button class="question-button" onclick="window.ui.askSuggestedQuestion('${question.replace(/'/g, "\\'")}')">${question}</button>`
+                    ).join('')}
+                </div>
+                
+                <div class="chat-interface">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-group">
+                        <textarea 
+                            class="chat-input" 
+                            id="chat-input" 
+                            placeholder="Ask me anything about my mission..."
+                            rows="1"
+                        ></textarea>
+                        <button class="chat-send-btn" id="chat-send-btn" onclick="window.ui.sendChatMessage()">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Setup chat input event listeners
+            this.setupChatEventListeners();
+            
+        } catch (error) {
+            console.error('Error loading AI assistant:', error);
+            aiSection.innerHTML = `
+                <div class="satellite-intro">
+                    Hey! I'm ${satelliteData.name}, orbiting Earth at ${Math.round(satelliteData.altitude)} km altitude. 
+                    I complete one orbit every ${this.formatPeriod(satelliteData.period)}, traveling at approximately 
+                    ${this.calculateOrbitalVelocity(satelliteData.altitude).toFixed(2)} km/s. 
+                    My AI systems are currently offline, but feel free to explore my technical specifications above!
+                </div>
+            `;
+        }
+    }
+
+    setupChatEventListeners() {
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+        
+        if (!chatInput || !sendBtn) return;
+        
+        // Auto-resize textarea
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 72) + 'px';
+        });
+        
+        // Send message on Enter (Shift+Enter for new line)
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.sendChatMessage();
+            }
+        });
+    }
+
+    async askSuggestedQuestion(question) {
+        // Add user message to chat
+        this.addChatMessage(question, 'user');
+        
+        // Disable all question buttons
+        const questionButtons = this.panelContent.querySelectorAll('.question-button');
+        questionButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+        });
+        
+        try {
+            // Get answer from Gemini
+            const documentContent = await this.geminiService.loadSatelliteDocument(this.currentSatelliteData.name);
+            const answer = await this.geminiService.answerQuestion(question, this.currentSatelliteData, documentContent);
+            
+            // Add AI response to chat
+            this.addChatMessage(answer, 'assistant');
+            
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            this.addChatMessage("I apologize, but I'm having trouble accessing my knowledge systems right now. Please try again in a moment!", 'assistant');
+        }
+        
+        // Re-enable question buttons with original text
+        const originalQuestions = await this.geminiService.generateSuggestedQuestions(this.currentSatelliteData, 
+            await this.geminiService.loadSatelliteDocument(this.currentSatelliteData.name));
+        questionButtons.forEach((btn, index) => {
+            btn.disabled = false;
+            if (originalQuestions[index]) {
+                btn.textContent = originalQuestions[index];
+            }
+        });
+    }
+
+    async sendChatMessage() {
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send-btn');
+        
+        if (!chatInput || !sendBtn) return;
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Clear input and disable send button
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        sendBtn.disabled = true;
+        sendBtn.textContent = '...';
+        
+        // Add user message to chat
+        this.addChatMessage(message, 'user');
+        
+        try {
+            // Get answer from Gemini
+            const documentContent = await this.geminiService.loadSatelliteDocument(this.currentSatelliteData.name);
+            const answer = await this.geminiService.answerQuestion(message, this.currentSatelliteData, documentContent);
+            
+            // Add AI response to chat
+            this.addChatMessage(answer, 'assistant');
+            
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            this.addChatMessage("I apologize, but I'm having trouble processing your question right now. Please try again in a moment!", 'assistant');
+        }
+        
+        // Re-enable send button
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
+        chatInput.focus();
+    }
+
+    addChatMessage(message, type) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${type}`;
+        messageDiv.textContent = message;
+        
+        chatMessages.appendChild(messageDiv);
+        
+        // Store in chat history
+        this.chatHistory.push({ message, type, timestamp: new Date() });
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 }
