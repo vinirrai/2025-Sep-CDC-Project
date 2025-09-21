@@ -1,11 +1,11 @@
-# 🛰️ Carolina Data Challenge 2025: Zero Gravity
+# Carolina Data Challenge 2025: Zero Gravity
 
 **Project: Orbital Debris Tracker – 3D Space Visualization**
 
 Using NASA TLE API on Grad Track
 
 
-## 🌌 About the Project
+## About the Project
 
 At **Carolina Data Challenge 2025**, our team wanted to explore the growing problem of **orbital debris** and make it **understandable, visual, and interactive**. Using **TLE (Two-Line Element) data**, we simulate satellite and debris trajectories in Earth’s orbit.
 
@@ -18,31 +18,26 @@ Our platform allows users to:
 
 ---
 
-## ✨ Features
+## Features
 
-### 🌍 3D Globe Environment
+### 3D Globe Environment
 
 * Realistic Earth with day/night textures, atmosphere, and city lights
 * Smooth globe rotation and zoom navigation
 
-### 🛰️ Satellite & Debris Tracking
+### Satellite & Debris Tracking
 
 * TLE-based orbital propagation (via Satellite.js)
 * Orbits color-coded by altitude (LEO, MEO, GEO, HEO)
 * Toggle orbit trails and object labels
 
-### ⚠️ Collision Detection (CDC Core)
-
-* Predicts possible debris-satellite conjunctions
-* Highlights collision risk zones
-
-### 🎮 Interactive Controls
+### Interactive Controls
 
 * Click-to-select satellites/debris
 * Search by **name or NORAD ID**
 * Zoom into objects and view detailed orbital parameters
 
-### 🤖 Gemini AI Satellite Assistant
+### Llama 70 Billion AI Satellite Assistant
 
 * Ask questions like:
 
@@ -53,7 +48,7 @@ Our platform allows users to:
 
 ---
 
-## 🚀 Installation
+## Installation
 
 1. Clone the repo:
 
@@ -89,7 +84,7 @@ Our platform allows users to:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 2025-Sep-CDC-Project/
@@ -115,56 +110,53 @@ Our platform allows users to:
 
 ---
 
-## 🛠 Technologies Used
+## Technologies Used
 
 * **Three.js** – 3D rendering (Earth, orbits, debris)
 * **Satellite.js** – TLE parsing & orbital mechanics
 * **GSAP** – Animations & smooth transitions
 * **Vite** – Build tool & dev server
-* **Gemini AI API** – Satellite Assistant
+* **Llama 70 Billion AI API** – Satellite Assistant
 
 ---
 
-## 🌟 Why This Matters
+## Why This Matters
 
 * Orbital debris is a **growing problem**: thousands of fragments threaten satellites and the ISS.
 * Our tool helps **visualize, understand, and communicate** the issue in an **interactive way**.
 * It can be used for **education, research, and cawareness** — making the invisible problem visible.
 
 ---
-
-📜 License
+## License
 
 MIT License – Open for educational and research use.
 
-🙏 Citations & Acknowledgments
+## Citations & Acknowledgments
 
-This project was built with the support of several open-source tools and APIs:
+# This project was built with the support of several open-source tools and APIs:
 
-Three.js
+* Three.js
  – 3D rendering and WebGL
 
-Satellite.js
+* Satellite.js
  – TLE parsing and orbital mechanics
 
-GSAP
+* GSAP
  – Smooth animations and transitions
 
-Vite
+* Vite
  – Modern dev server and build tool
 
-Skyfield
+* Skyfield
  (for offline TLE validation and orbital propagation)
 
-CelesTrak
+* CelesTrak
  – Source of TLE data
 
-Gemini API
+* Llama 70 Billion API
  – Used for our AI Satellite Assistant that answers user queries
 
-ChatGPT (OpenAI GPT-5)
+* ChatGPT (OpenAI GPT-5)
  – Assisted in brainstorming, debugging, and drafting documentation, including this README
 
-We also acknowledge the Carolina Data Challenge 2025 team for providing the theme “Zero Gravity” and organizing the hackathon.
-
-⚡ Built at Carolina Data Challenge 2025 (UNC Chapel Hill) under the theme: Zero Gravity.
+Built at Carolina Data Challenge 2025 (UNC Chapel Hill) under the theme: Zero Gravity.
