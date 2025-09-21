@@ -229,10 +229,6 @@ class OrbitalDebrisVisualizer {
         document.getElementById('panel-minimize').addEventListener('click', () => this.toggleInfoPanel());
         document.getElementById('legend-minimize').addEventListener('click', () => this.toggleLegendPanel());
 
-        // New spatial selection controls
-        document.getElementById('spatial-select').addEventListener('click', () => this.enableSpatialSelection());
-        document.getElementById('clear-selection').addEventListener('click', () => this.clearSpatialSelection());
-        document.getElementById('analyze-collisions').addEventListener('click', () => this.analyzeCollisions());
 
         // Time control events
         document.getElementById('time-slider').addEventListener('input', (e) => this.updateTimeOffset(e));
@@ -555,24 +551,11 @@ IRIDIUM 33 DEB
         }
     }
 
-    // New spatial selection methods
-    enableSpatialSelection() {
-        this.spatialSelector.enableSelection();
-        document.getElementById('spatial-select').classList.add('active');
-    }
-
-    clearSpatialSelection() {
-        this.spatialSelector.clearSelection();
-        this.hideAnalysisPanel();
-        this.clearCollisionMarkers();
-        document.getElementById('spatial-select').classList.remove('active');
-    }
 
     onSpatialSelection(bounds) {
         console.log('Spatial selection created:', bounds);
         this.showAnalysisPanel();
         this.updateSpatialAnalysis();
-        document.getElementById('spatial-select').classList.remove('active');
     }
 
     onSpatialSelectionCleared() {
@@ -805,12 +788,6 @@ IRIDIUM 33 DEB
     }
 
     // Collision analysis methods
-    analyzeCollisions() {
-        this.showAnalysisPanel();
-        if (this.spatialSelector.selectionBounds) {
-            this.spatialSelector.animateToRegion();
-        }
-    }
     
     enterFocusedView() {
         if (!this.spatialSelector.selectionBounds) {
