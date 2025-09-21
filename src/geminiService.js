@@ -3,11 +3,7 @@ import mammoth from 'mammoth';
 
 export class GeminiService {
     constructor() {
-        this.apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-        if (!this.apiKey) {
-            console.error('VITE_GEMINI_API_KEY environment variable is not set');
-            throw new Error('Gemini API key is required but not found in environment variables');
-        }
+        this.apiKey = "AIzaSyBaeFsviQ-VO-D3OdE7wi06usd8t_1upw0";
         this.genAI = new GoogleGenerativeAI(this.apiKey);
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
         this.documentCache = new Map();
