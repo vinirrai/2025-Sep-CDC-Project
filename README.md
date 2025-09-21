@@ -44,7 +44,6 @@ Our platform allows users to:
   * *“Where is the ISS right now?”*
   * *“Which satellites are currently in GEO?”*
   * *“Explain the difference between Line 1 and Line 2 in TLE format.”*
-* Integrated securely with `.env` API key management
 
 ---
 
