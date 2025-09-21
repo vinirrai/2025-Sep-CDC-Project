@@ -4,10 +4,11 @@
 
 Using NASA TLE API on Grad Track
 
+---
 
 ## About the Project
 
-At **Carolina Data Challenge 2025**, our team wanted to explore the growing problem of **orbital debris** and make it **understandable, visual, and interactive**. Using **TLE (Two-Line Element) data**, we simulate satellite and debris trajectories in Earth’s orbit.
+At **Carolina Data Challenge 2025**, our team set out to explore the growing problem of **orbital debris** and make it **understandable, visual, and interactive**. Using **TLE (Two-Line Element) data**, we simulate satellite and debris trajectories in Earth’s orbit and provide a platform to study their dynamics.
 
 Our platform allows users to:
 
@@ -37,49 +38,77 @@ Our platform allows users to:
 * Search by **name or NORAD ID**
 * Zoom into objects and view detailed orbital parameters
 
-### Llama 70 Billion AI Satellite Assistant
+### AI Satellite Assistant
 
-* Ask questions like:
+* Ask questions such as:
 
   * *“Where is the ISS right now?”*
   * *“Which satellites are currently in GEO?”*
   * *“Explain the difference between Line 1 and Line 2 in TLE format.”*
+* Integrated securely with `.env` API key management
+
+---
+
+## Steps of Analysis
+
+1. **Data Collection** – Pulled archived TLEs from **CelesTrak/NASA feeds**.
+2. **TLE Parsing** – Extracted **Line 1/Line 2** elements and propagated orbits.
+3. **Visualization** – Plotted objects in a 3D environment with altitude coding.
+4. **Analysis** – Compared orbital densities and detected potential conjunctions.
+5. **Communication** – Enabled an AI-driven Q\&A assistant for contextual insights.
+
+---
+
+## Visualizations
+
+Below are key visual outputs that demonstrate our workflow and analysis:
+
+1. **Global Orbital Debris Map** – Thousands of tracked objects rendered in real-time.
+   *(Insert screenshot/GIF here)*
+
+2. **Altitude-Based Classification** – LEO, MEO, GEO, and HEO objects shown in different colors for clarity.
+   *(Insert screenshot/GIF here)*
+
+3. **Collision Detection Demo** – Example of two close approaches flagged by our system.
+   *(Insert screenshot/GIF here)*
+
+4. **AI Assistant in Action** – Example queries like “Where is the ISS right now?” and AI-powered answers.
+   *(Insert screenshot/GIF here)*
+
+---
+
+## Conclusions
+
+* **Debris density is highest in LEO**, confirming risks of congestion and collisions.
+* Visualization reveals clear clustering patterns not obvious in raw data.
+* The interactive globe helps bridge the gap between raw orbital mechanics and human understanding.
+* AI integration lowers barriers, making **space situational awareness accessible** to non-experts.
+
+---
+
+## Value and Impact
+
+* **Education**: A tool for students to explore and understand space debris.
+* **Research**: Useful for studying decay rates, clustering, and conjunctions.
+* **Policy Awareness**: Makes the urgency of orbital debris mitigation more visible.
+* **Hackathon Relevance**: Demonstrates how data science and visualization translate into **actionable insights**.
 
 ---
 
 ## Installation
 
-1. Clone the repo:
+```bash
+git clone https://github.com/your-username/2025-Sep-CDC-Project.git
+cd 2025-Sep-CDC-Project
+npm install
+npm run dev
+```
 
-   ```bash
-   git clone https://github.com/your-username/2025-Sep-CDC-Project.git
-   cd 2025-Sep-CDC-Project
-   ```
+Then open:
 
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Setup environment variables:
-   Create a `.env` file in the project root:
-
-   ```env
-   VITE_GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-4. Start the dev server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open your browser at:
-
-   ```
-   http://localhost:3000
-   ```
+```
+http://localhost:3000
+```
 
 ---
 
@@ -87,75 +116,42 @@ Our platform allows users to:
 
 ```
 2025-Sep-CDC-Project/
-│
 ├── dist/                 # Build output
 ├── public/               # Static assets
 ├── src/                  # Core code
-│   ├── earth.js          # 3D Earth rendering
-│   ├── debrisManager.js  # Orbital debris visualization
-│   ├── collisionDetector.js # Collision prediction
-│   ├── tleParser.js      # TLE parsing utilities
-│   ├── geminiService.js  # AI integration
-│   ├── uiController.js   # UI interactions
-│   └── style.css         # Styling
-│
-├── sample_TLE_data.pdf   # Example TLE dataset
-├── index.html            # Entry point
-├── vite.config.js        # Build config
-├── package.json          # Dependencies
-├── env-setup.md          # API key setup
-└── README.md             # Project documentation
+│   ├── earth.js
+│   ├── debrisManager.js
+│   ├── collisionDetector.js
+│   ├── tleParser.js
+│   ├── geminiService.js
+│   ├── uiController.js
+│   └── style.css
+├── sample_TLE_data.pdf
+├── index.html
+├── vite.config.js
+├── package.json
+├── env-setup.md
+└── README.md
 ```
 
 ---
 
 ## Technologies Used
 
-* **Three.js** – 3D rendering (Earth, orbits, debris)
+* **Three.js** – 3D rendering
 * **Satellite.js** – TLE parsing & orbital mechanics
-* **GSAP** – Animations & smooth transitions
-* **Vite** – Build tool & dev server
-* **Llama 70 Billion AI API** – Satellite Assistant
+* **GSAP** – Animations
+* **Vite** – Build tool
+* **Llama 70B API** – AI Assistant
 
 ---
-
-## Why This Matters
-
-* Orbital debris is a **growing problem**: thousands of fragments threaten satellites and the ISS.
-* Our tool helps **visualize, understand, and communicate** the issue in an **interactive way**.
-* It can be used for **education, research, and cawareness** — making the invisible problem visible.
-
----
-## License
-
-MIT License – Open for educational and research use.
 
 ## Citations & Acknowledgments
 
-### This project was built with the support of several open-source tools and APIs:
+* **Three.js**, **Satellite.js**, **GSAP**, **Vite**
+* **Skyfield** – offline orbital propagation
+* **CelesTrak** – Source of TLE data
+* **Llama 70 Billion API** – AI assistant integration
+* **ChatGPT (OpenAI GPT-5)** – Assisted in brainstorming, debugging, and documentation
 
-* Three.js
- – 3D rendering and WebGL
-
-* Satellite.js
- – TLE parsing and orbital mechanics
-
-* GSAP
- – Smooth animations and transitions
-
-* Vite
- – Modern dev server and build tool
-
-* Skyfield
- (for offline TLE validation and orbital propagation)
-
-* CelesTrak
- – Source of TLE data
-
-* Llama 70 Billion API
- – Used for our AI Satellite Assistant that answers user queries
-
-* ChatGPT (OpenAI GPT-5)
- – Assisted in brainstorming, debugging, and drafting documentation, including this README
-
-Built at Carolina Data Challenge 2025 (UNC Chapel Hill) under the theme: Zero Gravity.
+Built at **Carolina Data Challenge 2025 (UNC Chapel Hill)** under the theme: **Zero Gravity**.
