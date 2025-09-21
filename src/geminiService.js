@@ -47,7 +47,9 @@ export class GeminiService {
     }
 
     async generateSatelliteIntro(satelliteData, documentContent) {
-        const prompt = `You are ${satelliteData.name}, a satellite in space. Using the following information, introduce yourself in first person as if you are the satellite speaking. Keep it to 3-4 sentences, friendly and informative.
+        const gravity = this.calculateGravityAtAltitude(satelliteData.altitude);
+        
+        const prompt = `You are ${satelliteData.name}, a satellite in space. Using the following information, introduce yourself in first person as if you are the satellite speaking. Keep it to 3-4 sentences, friendly and informative. IMPORTANT: Include a mention of experiencing weightlessness/zero-g in your introduction.
 
 Satellite Technical Data:
 - Name: ${satelliteData.name}
@@ -56,18 +58,20 @@ Satellite Technical Data:
 - Inclination: ${satelliteData.inclination}°
 - Orbital Period: ${satelliteData.period} minutes
 - Velocity: ${this.calculateVelocity(satelliteData.altitude)} km/s
+- Local Gravity: ${gravity.percentage.toFixed(1)}% of Earth's surface gravity
+- Zero-G State: Experiencing weightlessness due to continuous free-fall
 
 Additional Information:
 ${documentContent || 'No additional documentation available.'}
 
-Start with "Hey! I'm ${satelliteData.name}..." and keep the tone conversational and engaging.`;
+Start with "Hey! I'm ${satelliteData.name}..." and include a reference to being weightless or experiencing zero-g. Keep the tone conversational and engaging.`;
 
         try {
             const result = await this.model.generateContent(prompt);
             return result.response.text();
         } catch (error) {
             console.error('Error generating satellite intro:', error);
-            return `Hey! I'm ${satelliteData.name}, orbiting Earth at ${satelliteData.altitude} km altitude. I complete one orbit every ${satelliteData.period} minutes, traveling at approximately ${this.calculateVelocity(satelliteData.altitude)} km/s. Feel free to ask me anything about my mission!`;
+            return `Hey! I'm ${satelliteData.name}, orbiting Earth at ${satelliteData.altitude} km altitude in a state of weightlessness! Even though gravity here is ${gravity.percentage.toFixed(1)}% of Earth's surface, I'm in continuous free-fall, which means I experience zero-g. I complete one orbit every ${Math.round(satelliteData.period)} minutes. Feel free to ask me anything about my mission!`;
         }
     }
 
@@ -137,5 +141,20 @@ Answer conversationally as the satellite, using "I" and "my" when referring to y
         const mu = 398600.4418; // Earth's gravitational parameter km^3/s^2
         const radius = earthRadius + altitude;
         return Math.sqrt(mu / radius).toFixed(2);
+    }
+    
+    calculateGravityAtAltitude(altitude) {
+        const earthRadius = 6371; // km
+        const surfaceGravity = 9.80665; // m/s²
+        
+        // g(h) = g0 * (Re / (Re + h))^2
+        const ratio = earthRadius / (earthRadius + altitude);
+        const gravityAtAltitude = surfaceGravity * Math.pow(ratio, 2);
+        const gravityPercent = (gravityAtAltitude / surfaceGravity) * 100;
+        
+        return {
+            gravity: gravityAtAltitude,
+            percentage: gravityPercent
+        };
     }
 }

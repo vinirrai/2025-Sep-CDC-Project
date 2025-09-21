@@ -15,6 +15,14 @@ export class Draggable {
         this.mouseDownPosition = { x: 0, y: 0 };
         this.dragThreshold = 5; // Minimum pixels to move before considering it a drag
         
+        // Zero-G mode properties
+        this.velocity = { x: 0, y: 0 };
+        this.friction = 0.85;
+        this.zerogFriction = 0.98;
+        this.inertiaFrameId = null;
+        this.lastPosition = { x: 0, y: 0 };
+        this.lastTime = 0;
+        
         this.init();
     }
     
@@ -262,6 +270,10 @@ export class Draggable {
     updatePosition(clientX, clientY) {
         if (!this.isDragging) return;
         
+        // Track previous position and time for inertia calculations
+        this.lastPosition = { ...this.currentPosition };
+        this.lastTime = Date.now();
+        
         let newX = clientX - this.dragOffset.x;
         let newY = clientY - this.dragOffset.y;
         
@@ -294,6 +306,12 @@ export class Draggable {
     endDrag() {
         if (!this.isDragging) return;
         
+        // Calculate movement for Zero-G inertia
+        const currentTime = Date.now();
+        const deltaTime = Math.max(currentTime - this.lastTime, 16);
+        const deltaX = this.currentPosition.x - this.lastPosition.x;
+        const deltaY = this.currentPosition.y - this.lastPosition.y;
+        
         this.isDragging = false;
         this.isDragStarted = false;
         this.mouseDownPosition = null;
@@ -304,6 +322,11 @@ export class Draggable {
         setTimeout(() => {
             this.element.style.zIndex = '';
         }, 100);
+        
+        // Start Zero-G inertia if enabled
+        if (this.isZeroGMode() && (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1)) {
+            this.startInertia(deltaX, deltaY, deltaTime);
+        }
         
         if (this.onDragEnd) {
             this.onDragEnd(this.element, this.currentPosition);
@@ -361,6 +384,87 @@ export class Draggable {
         this.element.style.right = '';
         this.element.style.bottom = '';
         this.element.style.transform = '';
+    }
+    
+    // Zero-G Mode Methods
+    isZeroGMode() {
+        return document.body.classList.contains('zerog-mode');
+    }
+    
+    startInertia(deltaX, deltaY, deltaTime) {
+        if (!this.isZeroGMode()) return;
+        
+        // Calculate velocity based on drag movement
+        this.velocity.x = deltaX / deltaTime * 16; // Scale for 60fps
+        this.velocity.y = deltaY / deltaTime * 16;
+        
+        // Limit maximum velocity
+        const maxVelocity = 200;
+        const speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+        if (speed > maxVelocity) {
+            const scale = maxVelocity / speed;
+            this.velocity.x *= scale;
+            this.velocity.y *= scale;
+        }
+        
+        // Start inertia animation
+        this.continueInertia();
+    }
+    
+    continueInertia() {
+        if (!this.isZeroGMode() || (Math.abs(this.velocity.x) < 0.1 && Math.abs(this.velocity.y) < 0.1)) {
+            this.stopInertia();
+            return;
+        }
+        
+        // Get current position
+        const rect = this.element.getBoundingClientRect();
+        const currentX = parseInt(this.element.style.left) || 0;
+        const currentY = parseInt(this.element.style.top) || 0;
+        
+        // Apply velocity
+        let newX = currentX + this.velocity.x;
+        let newY = currentY + this.velocity.y;
+        
+        // Boundary checking with gentle bounce
+        const boundaryRect = this.boundary.getBoundingClientRect();
+        const elementRect = this.element.getBoundingClientRect();
+        
+        // Horizontal boundaries
+        if (newX < -elementRect.width + 50) {
+            newX = -elementRect.width + 50;
+            this.velocity.x *= -0.6; // Gentle bounce
+        } else if (newX > boundaryRect.width - 50) {
+            newX = boundaryRect.width - 50;
+            this.velocity.x *= -0.6;
+        }
+        
+        // Vertical boundaries
+        if (newY < 0) {
+            newY = 0;
+            this.velocity.y *= -0.6;
+        } else if (newY > boundaryRect.height - 50) {
+            newY = boundaryRect.height - 50;
+            this.velocity.y *= -0.6;
+        }
+        
+        // Apply friction
+        this.velocity.x *= this.zerogFriction;
+        this.velocity.y *= this.zerogFriction;
+        
+        // Update position
+        this.setPosition(newX, newY);
+        
+        // Continue animation
+        this.inertiaFrameId = requestAnimationFrame(() => this.continueInertia());
+    }
+    
+    stopInertia() {
+        if (this.inertiaFrameId) {
+            cancelAnimationFrame(this.inertiaFrameId);
+            this.inertiaFrameId = null;
+        }
+        this.velocity = { x: 0, y: 0 };
     }
     
     destroy() {

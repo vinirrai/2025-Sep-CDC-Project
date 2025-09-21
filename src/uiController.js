@@ -118,7 +118,7 @@ export class UIController {
         
         // Small delay to ensure proper CSS transitions
         requestAnimationFrame(() => {
-            this.infoPanel.classList.add('active');
+        this.infoPanel.classList.add('active');
         });
         
         // Update minimize button text if it exists
@@ -249,6 +249,58 @@ export class UIController {
             return "Satellite";
         }
     }
+    
+    calculateGravityAtAltitude(altitude) {
+        const earthRadius = 6371; // km
+        const surfaceGravity = 9.80665; // m/s²
+        
+        // g(h) = g0 * (Re / (Re + h))^2
+        const ratio = earthRadius / (earthRadius + altitude);
+        const gravityAtAltitude = surfaceGravity * Math.pow(ratio, 2);
+        const gravityPercent = (gravityAtAltitude / surfaceGravity) * 100;
+        
+        return {
+            gravity: gravityAtAltitude,
+            percentage: gravityPercent
+        };
+    }
+    
+    generateZeroGInfoCard(satelliteData) {
+        const gravity = this.calculateGravityAtAltitude(satelliteData.altitude);
+        const velocity = this.calculateOrbitalVelocity(satelliteData.altitude);
+        
+        return `
+            <div class="info-group zerog-info-card">
+                <h4>🚀 Zero-G Physics at This Orbit</h4>
+                <div class="zerog-explanation">
+                    <p><strong>Why I feel weightless:</strong> Even though gravity here is <strong>${gravity.percentage.toFixed(1)}%</strong> of Earth's surface gravity, I'm in continuous <em>free-fall</em> around Earth!</p>
+                </div>
+                
+                <div class="zerog-stats">
+                    <div class="zerog-stat">
+                        <span class="zerog-stat-label">Local Gravity:</span>
+                        <span class="zerog-stat-value">${gravity.gravity.toFixed(2)} m/s² (${gravity.percentage.toFixed(1)}% of surface)</span>
+                    </div>
+                    <div class="zerog-stat">
+                        <span class="zerog-stat-label">Orbital Velocity:</span>
+                        <span class="zerog-stat-value">${velocity.toFixed(2)} km/s</span>
+                    </div>
+                    <div class="zerog-stat">
+                        <span class="zerog-stat-label">Free-fall State:</span>
+                        <span class="zerog-stat-value">Weightless (0G experience)</span>
+                    </div>
+                    <div class="zerog-stat">
+                        <span class="zerog-stat-label">Orbital Period:</span>
+                        <span class="zerog-stat-value">${this.formatPeriod(satelliteData.period)}</span>
+                    </div>
+                </div>
+                
+                <div class="zerog-physics-note">
+                    <small>💡 <em>Microgravity = Gravity + Centripetal acceleration canceling each other out</em></small>
+                </div>
+            </div>
+        `;
+    }
 
     async loadAIAssistant(satelliteData) {
         const aiSection = this.panelContent.querySelector('.ai-assistant-section');
@@ -268,6 +320,8 @@ export class UIController {
                 <div class="satellite-intro">
                     ${intro}
                 </div>
+                
+                ${this.generateZeroGInfoCard(satelliteData)}
                 
                 <div class="suggested-questions">
                     <h5>Ask me about:</h5>

@@ -282,6 +282,48 @@ body {
     border-color: var(--accent);
 }
 
+/* Zero-G Toggle Button */
+.zerog-toggle {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 4px;
+    width: 44px;
+    height: 36px;
+}
+
+.zerog-toggle .zerog-label {
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+    line-height: 1;
+}
+
+.zerog-toggle.active {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border-color: #ff6b6b;
+    animation: zerogPulse 2s ease-in-out infinite;
+}
+
+.zerog-toggle.active svg {
+    animation: zerogFloat 3s ease-in-out infinite;
+}
+
+@keyframes zerogPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
+}
+
+@keyframes zerogFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-1px) rotate(3deg); }
+    66% { transform: translateY(0.5px) rotate(-2deg); }
+}
+
 .toolbar-separator {
     height: 1px;
     background: var(--border);
@@ -930,6 +972,147 @@ body {
     background: rgba(0, 217, 255, 0.3);
     cursor: not-allowed;
     transform: none;
+}
+
+/* Zero-G Info Card Styles */
+.zerog-info-card {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.05));
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+.zerog-info-card h4 {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zerog-explanation {
+    margin-bottom: 16px;
+}
+
+.zerog-explanation p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0;
+    font-style: italic;
+}
+
+.zerog-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.zerog-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.zerog-stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.zerog-stat-value {
+    font-size: 11px;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+}
+
+.zerog-physics-note {
+    text-align: center;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.zerog-physics-note small {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Zero-G Mode Effects */
+.zerog-mode .draggable-panel {
+    animation: zerogPanelFloat 6s ease-in-out infinite;
+    transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.zerog-mode .info-panel {
+    animation-delay: 0s;
+}
+
+.zerog-mode .time-control-panel {
+    animation-delay: 1.5s;
+}
+
+.zerog-mode .analysis-panel {
+    animation-delay: 3s;
+}
+
+.zerog-mode .legend-panel {
+    animation-delay: 4.5s;
+}
+
+@keyframes zerogPanelFloat {
+    0%, 100% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg);
+        filter: drop-shadow(0 4px 20px rgba(0, 217, 255, 0.1));
+    }
+    25% { 
+        transform: translateY(-3px) translateX(1px) rotate(0.5deg);
+        filter: drop-shadow(0 8px 25px rgba(0, 217, 255, 0.15));
+    }
+    50% { 
+        transform: translateY(-1px) translateX(-1px) rotate(-0.3deg);
+        filter: drop-shadow(0 6px 22px rgba(0, 217, 255, 0.12));
+    }
+    75% { 
+        transform: translateY(-2px) translateX(0.5px) rotate(0.2deg);
+        filter: drop-shadow(0 7px 24px rgba(0, 217, 255, 0.14));
+    }
+}
+
+/* Zero-G floating cursor trail effect */
+.zerog-mode {
+    cursor: none;
+}
+
+.zerog-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 217, 255, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: all 0.1s ease-out;
+    animation: zerogCursorGlow 2s ease-in-out infinite;
+}
+
+@keyframes zerogCursorGlow {
+    0%, 100% { 
+        box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+        transform: scale(1.1);
+    }
 }
 
 .satellites-list {

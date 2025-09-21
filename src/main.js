@@ -230,6 +230,9 @@ class OrbitalDebrisVisualizer {
         document.getElementById('panel-close').addEventListener('click', () => this.uiController.hideInfoPanel());
         document.getElementById('panel-minimize').addEventListener('click', () => this.toggleInfoPanel());
         document.getElementById('legend-minimize').addEventListener('click', () => this.toggleLegendPanel());
+        
+        // Zero-G Mode Toggle
+        document.getElementById('zerog-toggle').addEventListener('click', () => this.toggleZeroGMode());
 
 
         // Time control events
@@ -652,6 +655,111 @@ IRIDIUM 33 DEB
         
         panel.classList.toggle('minimized');
         minimize.textContent = panel.classList.contains('minimized') ? '' : '−';
+    }
+    
+    toggleZeroGMode() {
+        const button = document.getElementById('zerog-toggle');
+        const body = document.body;
+        const isActive = body.classList.contains('zerog-mode');
+        
+        if (isActive) {
+            // Disable Zero-G mode
+            body.classList.remove('zerog-mode');
+            button.classList.remove('active');
+            this.removeZeroGCursor();
+            
+            // Stop all inertia animations
+            this.draggablePanels.forEach(draggable => {
+                draggable.stopInertia();
+            });
+        } else {
+            // Enable Zero-G mode
+            body.classList.add('zerog-mode');
+            button.classList.add('active');
+            this.createZeroGCursor();
+            
+            // Show brief notification
+            this.showZeroGNotification(true);
+        }
+    }
+    
+    createZeroGCursor() {
+        // Remove existing cursor if any
+        this.removeZeroGCursor();
+        
+        // Create floating cursor element
+        this.zerogCursor = document.createElement('div');
+        this.zerogCursor.className = 'zerog-cursor';
+        document.body.appendChild(this.zerogCursor);
+        
+        // Track mouse movement
+        this.zerogMouseHandler = (e) => {
+            if (this.zerogCursor) {
+                this.zerogCursor.style.left = (e.clientX - 10) + 'px';
+                this.zerogCursor.style.top = (e.clientY - 10) + 'px';
+            }
+        };
+        
+        document.addEventListener('mousemove', this.zerogMouseHandler);
+    }
+    
+    removeZeroGCursor() {
+        if (this.zerogCursor) {
+            this.zerogCursor.remove();
+            this.zerogCursor = null;
+        }
+        
+        if (this.zerogMouseHandler) {
+            document.removeEventListener('mousemove', this.zerogMouseHandler);
+            this.zerogMouseHandler = null;
+        }
+    }
+    
+    showZeroGNotification(enabled) {
+        // Create temporary notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            pointer-events: none;
+            animation: fadeInOut 2s ease-in-out;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        `;
+        
+        notification.textContent = enabled 
+            ? '🚀 Zero-G Mode Enabled - Panels now float with inertia!'
+            : '🌍 Zero-G Mode Disabled - Normal physics restored';
+        
+        document.body.appendChild(notification);
+        
+        // Add CSS animation if not already present
+        if (!document.getElementById('zerog-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'zerog-notification-styles';
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Remove notification after animation
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
     }
     
     setupDraggablePanels() {
