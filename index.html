@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbital Debris Tracker | 3D Space Visualization</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader">
+            <div class="loader-orbit"></div>
+            <div class="loader-text">Initializing Space Environment...</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app">
+        <!-- 3D Canvas Container -->
+        <div id="canvas-container"></div>
+
+        <!-- Top Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <svg class="logo" width="30" height="30" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="5" fill="currentColor"/>
+                    <ellipse cx="50" cy="50" rx="45" ry="20" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                </svg>
+                <span>Orbital Debris Tracker</span>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search debris by name or NORAD ID...">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <div id="search-results" class="search-results"></div>
+                </div>
+            </div>
+
+            <div class="nav-stats">
+                <div class="stat">
+                    <span class="stat-value" id="debris-count">0</span>
+                    <span class="stat-label">Objects Tracked</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="time-display">00:00:00 UTC</span>
+                    <span class="stat-label">Simulation Time</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Control Toolbar -->
+        <div class="toolbar">
+            <button class="toolbar-btn" id="reset-view" title="Reset View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn active" id="toggle-orbits" title="Toggle Orbit Trails">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <ellipse cx="12" cy="12" rx="10" ry="4.5"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn active" id="toggle-labels" title="Toggle Labels">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                    <line x1="9" y1="15" x2="15" y2="9"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toggle-fullscreen" title="Fullscreen">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+            </button>
+            <div class="toolbar-separator"></div>
+            <button class="toolbar-btn" id="spatial-select" title="Select Spatial Region">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <path d="m9 9 5 5"/>
+                    <path d="m15 9-5 5"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="clear-selection" title="Clear Selection">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m15 9-6 6"/>
+                    <path d="m9 9 6 6"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="analyze-collisions" title="Analyze Collisions">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+            </button>
+            <div class="toolbar-separator"></div>
+            <button class="toolbar-btn" id="play-pause" title="Play/Pause">
+                <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <svg class="pause-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+            </button>
+            <div class="speed-control">
+                <label for="speed-slider">Speed:</label>
+                <input type="range" id="speed-slider" min="0.1" max="100" value="1" step="0.1">
+                <span id="speed-value">1x</span>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" id="info-panel">
+            <div class="panel-header">
+                <h3 id="debris-name">Select an Object</h3>
+                <div class="panel-buttons">
+                    <button class="panel-minimize" id="panel-minimize" title="Minimize">&minus;</button>
+                    <button class="panel-close" id="panel-close" title="Close">&times;</button>
+                </div>
+            </div>
+            <div class="panel-content" id="panel-content">
+                <p class="panel-hint">Click on any debris object to view its details</p>
+            </div>
+        </div>
+
+        <!-- TLE Upload -->
+        <div class="upload-container" id="upload-container">
+            <input type="file" id="tle-upload" accept=".txt,.tle" hidden>
+            <button class="upload-btn" onclick="document.getElementById('tle-upload').click()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload TLE File
+            </button>
+        </div>
+
+        <!-- Time Control Panel -->
+        <div class="time-control-panel" id="time-control-panel">
+            <div class="panel-header">
+                <h3>Time Controls</h3>
+                <button class="panel-minimize" id="time-panel-toggle" title="Minimize">&minus;</button>
+            </div>
+            <div class="panel-content" id="time-panel-content">
+                <div class="time-input-group">
+                    <label for="simulation-date">Simulation Date:</label>
+                    <input type="datetime-local" id="simulation-date" />
+                </div>
+                
+                <div class="time-slider-group">
+                    <label for="time-slider">Time Offset (hours):</label>
+                    <input type="range" id="time-slider" min="-24" max="168" value="0" step="1">
+                    <div class="time-slider-labels">
+                        <span>-24h</span>
+                        <span>+168h (7 days)</span>
+                    </div>
+                    <div class="time-offset-display">
+                        <span id="time-offset-value">+0 hours</span>
+                    </div>
+                </div>
+
+                <div class="time-presets">
+                    <button class="time-preset-btn" data-offset="0">Now</button>
+                    <button class="time-preset-btn" data-offset="6">+6h</button>
+                    <button class="time-preset-btn" data-offset="24">+1d</button>
+                    <button class="time-preset-btn" data-offset="168">+7d</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spatial Analysis Panel -->
+        <div class="analysis-panel" id="analysis-panel">
+            <div class="panel-header">
+                <h3>Spatial Analysis</h3>
+                <div class="panel-buttons">
+                    <button class="panel-minimize" id="analysis-panel-minimize" title="Minimize">&minus;</button>
+                    <button class="panel-close" id="analysis-panel-close" title="Close">&times;</button>
+                </div>
+            </div>
+            <div class="panel-content" id="analysis-panel-content">
+                <div class="analysis-section">
+                    <h4>Selected Region</h4>
+                    <div id="region-info" class="region-info">
+                        <p>No region selected</p>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>Satellites in Region</h4>
+                    <div id="satellites-in-region" class="satellites-list">
+                        <p class="no-data">Select a region to analyze</p>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h4>Collision Analysis</h4>
+                    <div class="collision-controls">
+                        <label for="collision-threshold">Collision Threshold (km):</label>
+                        <input type="number" id="collision-threshold" value="2" min="0.1" max="10" step="0.1">
+                        
+                        <label for="analysis-window">Analysis Window (hours):</label>
+                        <input type="number" id="analysis-window" value="24" min="1" max="168" step="1">
+                        
+                        <button class="analyze-btn" id="run-collision-analysis">Run Analysis</button>
+                    </div>
+                    
+                    <div id="collision-results" class="collision-results">
+                        <p class="no-data">No analysis run yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend" id="legend-panel">
+            <div class="legend-header">
+                <h4>Legend</h4>
+                <button class="panel-minimize" id="legend-minimize" title="Minimize">&minus;</button>
+            </div>
+            <div class="legend-content" id="legend-content">
+                <div class="legend-section">
+                    <h5>Altitude Legend</h5>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ff4444;"></span>
+                        <span>Low Earth Orbit (&lt; 2,000 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ffaa00;"></span>
+                        <span>Medium Earth Orbit (2,000 - 35,786 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #00aaff;"></span>
+                        <span>Geostationary Orbit (~35,786 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #aa00ff;"></span>
+                        <span>High Earth Orbit (&gt; 35,786 km)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-separator"></div>
+                
+                <div class="legend-section">
+                    <h5>Collision Risk</h5>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ff0000;"></span>
+                        <span>Critical (&lt; 0.5 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ff6600;"></span>
+                        <span>High (&lt; 1.0 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ffaa00;"></span>
+                        <span>Medium (&lt; 1.5 km)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ffff00;"></span>
+                        <span>Low (&lt; 2.0 km)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
