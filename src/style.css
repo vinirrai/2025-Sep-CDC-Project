@@ -246,27 +246,28 @@ body {
     background: var(--bg-tertiary);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     z-index: 100;
     box-shadow: var(--shadow);
 }
 
 .toolbar-btn {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 16px;
 }
 
 .toolbar-btn:hover {
@@ -284,7 +285,7 @@ body {
 .toolbar-separator {
     height: 1px;
     background: var(--border);
-    margin: 8px 0;
+    margin: 6px 0;
 }
 
 .hidden {
@@ -1010,6 +1011,95 @@ body {
     height: 1px;
     background: var(--border);
     margin: 16px 0;
+}
+
+/* Draggable Panel Styles */
+.draggable-panel {
+    user-select: none;
+}
+
+.draggable-panel .panel-header,
+.draggable-panel .legend-header {
+    cursor: grab;
+    user-select: none;
+}
+
+.draggable-panel .panel-header:active,
+.draggable-panel .legend-header:active {
+    cursor: grabbing;
+}
+
+/* Ensure minimized panels are still draggable */
+.draggable-panel.minimized {
+    cursor: grab;
+}
+
+.draggable-panel.minimized:active {
+    cursor: grabbing;
+}
+
+.draggable-panel.minimized .panel-header,
+.draggable-panel.minimized .legend-header {
+    cursor: grab;
+}
+
+.draggable-panel.minimized .panel-header:active,
+.draggable-panel.minimized .legend-header:active {
+    cursor: grabbing;
+}
+
+.draggable-panel.dragging {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 217, 255, 0.5);
+    transform: scale(1.02);
+    transition: none;
+}
+
+.draggable-panel .panel-header[data-draggable-handle],
+.draggable-panel .legend-header[data-draggable-handle] {
+    position: relative;
+}
+
+.draggable-panel .panel-header[data-draggable-handle]::before,
+.draggable-panel .legend-header[data-draggable-handle]::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 6px;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.draggable-panel:hover .panel-header[data-draggable-handle]::before,
+.draggable-panel:hover .legend-header[data-draggable-handle]::before {
+    opacity: 1;
+}
+
+.draggable-panel .panel-header h3,
+.draggable-panel .legend-header h4 {
+    pointer-events: none;
+}
+
+.draggable-panel .panel-header button,
+.draggable-panel .legend-header button {
+    pointer-events: all;
+    cursor: pointer;
+}
+
+/* Prevent text selection while dragging */
+.dragging, .dragging * {
+    user-select: none !important;
+    pointer-events: none !important;
+}
+
+.dragging .panel-header button,
+.dragging .legend-header button {
+    pointer-events: none !important;
 }
 
 /* Scrollbar Styles */

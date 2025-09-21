@@ -99,7 +99,28 @@ export class UIController {
             </div>
         `;
         
-        this.infoPanel.classList.add('active');
+        // Show the panel and ensure it's not minimized
+        this.infoPanel.classList.remove('minimized');
+        
+        // Small delay to ensure proper CSS transitions
+        requestAnimationFrame(() => {
+            this.infoPanel.classList.add('active');
+        });
+        
+        // Update minimize button text if it exists
+        const minimizeBtn = document.getElementById('panel-minimize');
+        if (minimizeBtn) {
+            minimizeBtn.textContent = '−';
+        }
+        
+        // Ensure panel is properly positioned (in case dragging moved it off-screen)
+        if (this.infoPanel.style.right === 'auto' || this.infoPanel.style.left) {
+            // Reset to CSS positioning if it was dragged
+            this.infoPanel.style.left = '';
+            this.infoPanel.style.top = '';
+            this.infoPanel.style.right = '';
+            this.infoPanel.style.bottom = '';
+        }
     }
 
     hideInfoPanel() {

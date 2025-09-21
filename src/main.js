@@ -9,6 +9,7 @@ import { UIController } from './uiController.js';
 import { SpatialSelector } from './spatialSelector.js';
 import { CollisionDetector } from './collisionDetector.js';
 import { FocusedView } from './focusedView.js';
+import { Draggable } from './draggable.js';
 
 class OrbitalDebrisVisualizer {
     constructor() {
@@ -50,6 +51,7 @@ class OrbitalDebrisVisualizer {
         this.setupCollisionDetector();
         this.setupUI();
         this.setupEventListeners();
+        this.setupDraggablePanels();
         this.loadDefaultTLE();
         this.animate();
         
@@ -225,6 +227,7 @@ class OrbitalDebrisVisualizer {
         document.getElementById('speed-slider').addEventListener('input', (e) => this.updateSpeed(e));
         document.getElementById('panel-close').addEventListener('click', () => this.uiController.hideInfoPanel());
         document.getElementById('panel-minimize').addEventListener('click', () => this.toggleInfoPanel());
+        document.getElementById('legend-minimize').addEventListener('click', () => this.toggleLegendPanel());
 
         // New spatial selection controls
         document.getElementById('spatial-select').addEventListener('click', () => this.enableSpatialSelection());
@@ -236,31 +239,39 @@ class OrbitalDebrisVisualizer {
         document.getElementById('simulation-date').addEventListener('change', (e) => this.updateSimulationDate(e));
         document.getElementById('time-panel-toggle').addEventListener('click', () => this.toggleTimePanel());
         
-        // Add click-to-restore for minimized panels
+        // Add click-to-restore for minimized panels (with drag detection)
         document.getElementById('time-control-panel').addEventListener('click', (e) => {
-            if (e.target.closest('.time-control-panel').classList.contains('minimized') && 
-                !e.target.closest('.panel-minimize')) {
+            const panel = e.target.closest('.time-control-panel');
+            if (panel && panel.classList.contains('minimized') && 
+                !e.target.closest('.panel-minimize') &&
+                !panel.hasAttribute('data-drag-pending')) {
                 this.toggleTimePanel();
             }
         });
         
         document.getElementById('info-panel').addEventListener('click', (e) => {
-            if (e.target.closest('.info-panel').classList.contains('minimized') && 
-                !e.target.closest('.panel-minimize')) {
+            const panel = e.target.closest('.info-panel');
+            if (panel && panel.classList.contains('minimized') && 
+                !e.target.closest('.panel-minimize') &&
+                !panel.hasAttribute('data-drag-pending')) {
                 this.toggleInfoPanel();
             }
         });
         
         document.getElementById('analysis-panel').addEventListener('click', (e) => {
-            if (e.target.closest('.analysis-panel').classList.contains('minimized') && 
-                !e.target.closest('.panel-minimize')) {
+            const panel = e.target.closest('.analysis-panel');
+            if (panel && panel.classList.contains('minimized') && 
+                !e.target.closest('.panel-minimize') &&
+                !panel.hasAttribute('data-drag-pending')) {
                 this.toggleAnalysisPanel();
             }
         });
         
         document.getElementById('legend-panel').addEventListener('click', (e) => {
-            if (e.target.closest('.legend').classList.contains('minimized') && 
-                !e.target.closest('.panel-minimize')) {
+            const panel = e.target.closest('.legend');
+            if (panel && panel.classList.contains('minimized') && 
+                !e.target.closest('.panel-minimize') &&
+                !panel.hasAttribute('data-drag-pending')) {
                 this.toggleLegendPanel();
             }
         });
@@ -656,6 +667,86 @@ IRIDIUM 33 DEB
         
         panel.classList.toggle('minimized');
         minimize.textContent = panel.classList.contains('minimized') ? '' : '−';
+    }
+    
+    setupDraggablePanels() {
+        // Make all panels draggable
+        const panels = [
+            {
+                id: 'time-control-panel',
+                options: {
+                    onDragStart: (element) => {
+                        // Bring panel to front during drag
+                        element.style.zIndex = '1000';
+                    },
+                    onDragEnd: (element, position) => {
+                        // Reset z-index after drag
+                        setTimeout(() => {
+                            element.style.zIndex = '';
+                        }, 100);
+                    }
+                }
+            },
+            {
+                id: 'info-panel',
+                options: {
+                    onDragStart: (element) => {
+                        element.style.zIndex = '1000';
+                    },
+                    onDragEnd: (element, position) => {
+                        setTimeout(() => {
+                            element.style.zIndex = '';
+                        }, 100);
+                    }
+                }
+            },
+            {
+                id: 'analysis-panel',
+                options: {
+                    onDragStart: (element) => {
+                        element.style.zIndex = '1000';
+                    },
+                    onDragEnd: (element, position) => {
+                        setTimeout(() => {
+                            element.style.zIndex = '';
+                        }, 100);
+                    }
+                }
+            },
+            {
+                id: 'legend-panel',
+                options: {
+                    onDragStart: (element) => {
+                        element.style.zIndex = '1000';
+                    },
+                    onDragEnd: (element, position) => {
+                        setTimeout(() => {
+                            element.style.zIndex = '';
+                        }, 100);
+                    }
+                }
+            }
+        ];
+
+        this.draggablePanels = [];
+        
+        panels.forEach(panelConfig => {
+            const element = document.getElementById(panelConfig.id);
+            if (element) {
+                // Add draggable class
+                element.classList.add('draggable-panel');
+                
+                // Create draggable instance
+                const draggable = new Draggable(element, panelConfig.options);
+                
+                // Load saved position
+                draggable.loadPosition();
+                
+                this.draggablePanels.push(draggable);
+            }
+        });
+        
+        console.log('✨ All panels are now draggable!');
     }
 
     updateSpatialAnalysis() {
