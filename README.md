@@ -133,7 +133,7 @@ MIT License – Open for educational and research use.
 
 ## Citations & Acknowledgments
 
-# This project was built with the support of several open-source tools and APIs:
+### This project was built with the support of several open-source tools and APIs:
 
 * Three.js
  – 3D rendering and WebGL
