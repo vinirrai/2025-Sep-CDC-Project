@@ -1,12 +1,9 @@
----
-
 # 🛰️ Carolina Data Challenge 2025: Zero Gravity
 
 **Project: Orbital Debris Tracker – 3D Space Visualization**
 
 Using NASA TLE API on Grad Track
 
----
 
 ## 🌌 About the Project
 
