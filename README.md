@@ -4,7 +4,7 @@
 
 **Project: Orbital Debris Tracker – 3D Space Visualization**
 
-<img src="/icons/rocket_purple.svg" alt="rocket" width="40px" /> Built for **CDC 2025**, this project takes the “Zero Gravity” theme literally — visualizing orbital debris and satellites in real-time 3D, with interactive exploration, AI assistance, and collision detection.
+Using NASA TLE API on Grad Track
 
 ---
 
