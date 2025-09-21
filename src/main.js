@@ -315,25 +315,30 @@ class OrbitalDebrisVisualizer {
         }
     }
 
-    onMouseClick(event) {
+    onMouseClick(event, isLabelClick = false) {
         // Don't handle clicks if we're in selection mode
         if (this.spatialSelector && this.spatialSelector.isSelecting) return;
-        
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        
-        // Set raycaster to check smaller objects more accurately
-        this.raycaster.params.Points.threshold = 2;
+        let intersects;
 
-        // Check both individual debris objects and the entire debris group
-        const objectsToCheck = [
-            ...this.debrisManager.getDebrisObjects(),
-            this.debrisManager.debrisGroup
-        ];
-        
-        const intersects = this.raycaster.intersectObjects(objectsToCheck, true);
+        if (isLabelClick) {
+            // If it's a label click, the clicked object is passed directly in event.target.object
+            intersects = [{ object: event.target.object }];
+        } else {
+            // For canvas clicks, use the raycaster
+            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            this.raycaster.params.Points.threshold = 2;
+
+            const objectsToCheck = [
+                ...this.debrisManager.getDebrisObjects(),
+                this.debrisManager.debrisGroup
+            ];
+            
+            intersects = this.raycaster.intersectObjects(objectsToCheck, true);
+        }
 
         if (intersects.length > 0) {
             // Find the actual debris object

@@ -183,10 +183,23 @@ export class DebrisManager {
             padding: 2px 6px;
             background: rgba(0, 0, 0, 0.7);
             border-radius: 3px;
-            pointer-events: none;
+            cursor: pointer;
             white-space: nowrap;
             display: none;
         `;
+
+        labelDiv.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent the click from propagating to the canvas
+            if (this.app) {
+                this.app.onMouseClick({
+                    target: {
+                        // Simulate a click event that looks like it came from the 3D object
+                        // by passing the debrisObject directly.
+                        object: debrisObject
+                    }
+                }, true); // Pass a flag to indicate this is a label click
+            }
+        });
         
         const label = new CSS2DObject(labelDiv);
         label.position.set(0, 2, 0);
