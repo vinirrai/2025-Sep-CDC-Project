@@ -3,7 +3,7 @@ import mammoth from 'mammoth';
 
 export class GeminiService {
     constructor() {
-        this.apiKey = "AIzaSyBaeFsviQ-VO-D3OdE7wi06usd8t_1upw0";
+        this.apiKey = "";
         this.genAI = new GoogleGenerativeAI(this.apiKey);
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
         this.documentCache = new Map();
